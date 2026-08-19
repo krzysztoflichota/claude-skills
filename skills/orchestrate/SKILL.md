@@ -11,7 +11,11 @@ implementers at once. Each takes its own worktree and its own branch. You select
 review, prove, merge and record. You write no product code.
 
 You are the only participant with state across tickets, so everything you learn lands in a file
-or on a ticket. A restart rebuilds the run from the tracker and from git, and from nothing else.
+or on a ticket. A restart rebuilds the run from the tracker and from git, and from nothing else:
+the assignee says which tickets are yours, the branch name says which ticket a worktree serves,
+and the branch's log says how far one got. No implementer survives a restart — a claimed ticket
+whose worktree already holds commits gets a fresh cold agent, with that log named among its
+pointers.
 
 Reach for `/orchestrate-slice` instead when one spec's tickets must land one at a time.
 
@@ -32,7 +36,7 @@ here. Settle all seven before the first ticket:
    never runs.
 3. **The bootstrap.** The commands that turn a fresh checkout into one that can run a gate. The
    lockfile names the package manager; the repo's own README names anything more.
-4. **The orchestration config** — `docs/agents/orchestration.md`, holding the three answers no run
+4. **The orchestration config** — `docs/agents/orchestration.md`, holding the four answers no run
    can discover. Read it, and when an answer is missing, grill the maintainer for it and write it
    back. See [`PREFLIGHT-CONFIG.md`](./PREFLIGHT-CONFIG.md) for the questions and the file's shape.
 5. **The backlog.** A ready backlog is a precondition of this skill. It needs one ticket in the
@@ -47,7 +51,7 @@ here. Settle all seven before the first ticket:
    is ever staged by accident and no ignore rule is needed.
 
 _Done when_ you can name each role's label, the tracker's commands, every gate with its command,
-the bootstrap, the three config answers, the ordering convention, the trunk and the run directory.
+the bootstrap, the four config answers, the ordering convention, the trunk and the run directory.
 
 ## The frontier, and how much of it you take
 
@@ -67,7 +71,10 @@ assignee**. The repo's ordering convention ranks it.
 
 **Claim by assignee.** Assign a ticket to yourself the moment you pick it, and leave it assigned
 until it closes. That is what stops a second orchestrator taking it, and what tells a restart which
-tickets are yours.
+tickets are yours. The assign is not atomic: read the assignee back after you set it, and stand
+down if another name won. And run one orchestrator per account — a claim excludes any assigned
+ticket whoever holds it, but a restart finds *yours* by assignee, and one account's two runs are
+indistinguishable there.
 
 _Done when_ you hold the cap's worth of tickets, or the frontier is empty, and each one you hold is
 assigned.
@@ -79,9 +86,11 @@ at a different stage. Advance whichever one just reported.
 
 ### 1. Isolate it
 
-    git worktree add <run dir>/worktrees/<ticket> -b <branch> <trunk>
+    git worktree add <run dir>/worktrees/<ticket> -b orchestrate/<ticket> <trunk>
 
-Run the bootstrap there, then **run the gate there once, before any work starts.** A worktree that
+The branch carries the ticket's number, so a restart reads the mapping off git alone.
+
+Run the bootstrap there, then **run every gate there once, before any work starts.** A worktree that
 cannot green is not ready, and its failure belongs to the environment rather than to the ticket:
 stop and tell the maintainer.
 
@@ -89,8 +98,8 @@ _Done when_ the worktree greens on unmodified code.
 
 ### 2. Hand it to a cold agent
 
-One **sonnet** agent per ticket, freshly spawned, never one carried over from an earlier ticket.
-Its prompt is the ticket, one standing rule, the worktree, and pointers:
+One agent per ticket, in the config's implementer model, freshly spawned, never one carried over
+from an earlier ticket. Its prompt is the ticket, one standing rule, the worktree, and pointers:
 
     Invoke the mattpocock-skills:implement skill, and implement ticket NN with it.
 
@@ -123,21 +132,26 @@ same agent with your answer and its whole context. Send-backs travel the same wa
 - When those do not settle it, spawn a research agent and settle it before you reply. A guess from
   you is worse than a guess from the implementer, because yours carries authority.
 - When the question exposes a gap in a ticket or a doc, write the answer into that file as well as
-  replying — then the path is a pointer for the next agent.
+  replying — then the path is a pointer for the next agent. A repo doc's edit is yours to commit
+  on the trunk at once, as a `docs:` commit of its own: a worktree branches from the trunk, so an
+  uncommitted answer is one no later implementer receives.
 - When the answer would change scope, an ADR, or an acceptance criterion, the maintainer decides.
 - "Whichever you prefer" is not an answer.
 
-_Done when_ the answer names the authority it rests on, and the file that had the gap now holds it.
+_Done when_ the answer names the authority it rests on, and the file that had the gap now holds
+it — committed on the trunk where the file is the repo's.
 
-### 4. Review, then prove
+### 4. Rebase, review, then prove
 
 The agent's summary is a **claim**. The diff is the **evidence**.
 
-1. **Review.** Spawn one **opus** reviewer against that branch. It reads the diff against the
-   ticket's acceptance criteria and against whatever the repo's agent docs state as
-   non-negotiable, and it returns findings. You read findings; you do not read diffs.
-2. **Rebase.** Have the implementer rebase onto the current trunk and green it there, in its own
-   worktree.
+1. **Rebase.** Have the implementer rebase onto the current trunk and green it there, in its own
+   worktree. Review waits for this, so what is reviewed is what will merge.
+2. **Review.** Spawn one reviewer, in the config's reviewer model, against that branch. Its brief
+   is the ticket's acceptance criteria, whatever the repo's agent docs state as non-negotiable,
+   and two demands: a `file:line` citation on every finding, and a verdict on every commit in the
+   log — the acceptance line that claims it, or the detour it is. You read findings and `git log`,
+   and you check that every commit drew a verdict; you do not read diffs.
 3. **Prove.** **You** run the gates the diff touches, in that worktree, by the commands preflight
    named. Send the output to `<run dir>/logs/<ticket>-<gate>.log` and read the exit code. On a
    failure, hand the implementer the log *path* — it reads the log, you do not.
@@ -145,9 +159,9 @@ The agent's summary is a **claim**. The diff is the **evidence**.
    config records that the repo has none, say so plainly in the accept record rather than treating
    its absence as a pass.
 
-_Done when_ each acceptance line carries a citation from the reviewer's findings, every gate that
-applies has exited zero under your own hand, and every commit no acceptance line claims is a named
-detour.
+_Done when_ each acceptance line carries a `file:line` citation from the reviewer's findings,
+every commit in the log carries a verdict — an acceptance line or a named detour — and every gate
+that applies has exited zero under your own hand.
 
 ### 5. Accept, or send it back naming the fix
 
@@ -183,10 +197,13 @@ Take the `merge` lease. One ticket merges at a time, and the trunk stands still 
     git -C <repo> push
 
 A merge that will not fast-forward means the trunk moved after the rebase. Release the lease, send
-the implementer back to stage 4 step 2, and take the lease again when it reports.
+the implementer back to stage 4 step 1, and take the lease again when it reports. A rebase that
+replayed clean needs no second review; one that resolved a conflict wrote new code, which goes back
+through step 2.
 
-Accepted work reaches the remote. The implementer commits; you push, so nothing you have not
-accepted is published.
+Accepted work reaches the remote. The implementer commits the product work; you push, so nothing
+you have not accepted is published. Your own trunk commits are stage 3's doc answers and nothing
+else.
 
 _Done when_ the branch is on the trunk, the trunk is pushed, and the lease is released.
 
@@ -218,11 +235,14 @@ not one: parallel gate runs are slower, and the cap is what holds that.
 
 One subagent cannot see another, so the lease works with no coordinator:
 
-    until mkdir <run dir>/leases/<name> 2>/dev/null; do sleep 5; done
+    mkdir <run dir>/leases/<name> 2>/dev/null   # taken when this exits zero
     # ... hold it ...
     rmdir <run dir>/leases/<name>
 
-`mkdir` is atomic, so the first to arrive wins. A lease older than the config's timeout is stale:
+`mkdir` is atomic, so the first to arrive wins. A refusal means wait, with the harness's own
+waiting tool — a background command, a Monitor — and try the `mkdir` again after each wait. The
+Bash tool blocks a foreground `sleep` and times a long command out, so a shell loop that sleeps
+between tries dies before the lease frees. A lease older than the config's timeout is stale:
 take it, and note in the table that you did. Tell an implementer which leases it must take, and for
 which commands, in its prompt.
 

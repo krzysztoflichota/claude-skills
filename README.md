@@ -15,8 +15,9 @@ Two skills, both user-invoked. Neither loads into context until you type its nam
 `docs/agents/orchestration.md`, and a trunk it may merge to. `/orchestrate-slice` needs none of
 those and stays the right tool for a slice worked start to finish.
 
-The two are deliberately self-contained rather than sharing a file. A user-invoked skill carries no
-description, so nothing can reach it but a human typing its name — including the other skill.
+The two are deliberately self-contained rather than sharing a file. Both set
+`disable-model-invocation: true`, so nothing can reach one but a human typing its name — including
+the other skill.
 
 ## Install
 

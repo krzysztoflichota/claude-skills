@@ -59,15 +59,15 @@ prompt is the ticket and one standing rule, in the same words every time:
 
     Invoke the mattpocock-skills:implement skill, and implement ticket NN with it.
     When you find a bug or a gap while you work, take the detour: fix it in this same
-    session, in a commit of its own. Open a ticket in the `needs-triage` role instead
-    only when the fix is large, or when only the maintainer can answer it.
+    session, in a commit of its own, whenever the fix needs no decision the ticket did
+    not already settle. When it needs one, open a ticket in the `needs-triage` role.
 
 `implement` is model-invocable, so the agent reaches it with the Skill tool. An agent that
 reports it could not invoke the skill has hit a real fault: confirm the skill is installed,
 rather than accepting work it improvised from a copy.
 
 A **detour** is a find fixed where it was found, and it is the default: "out of scope" and
-"a follow-up" are not on its two-item escape list.
+"a follow-up" are not the decision that escapes it.
 
 Nothing ticket-specific joins those words. A summary, a hint, a "watch out for", a result
 from an earlier ticket — each belongs in the ticket or the doc it is about: write it
@@ -124,7 +124,9 @@ Work reaches the bar. It never **moves the bar**. Send it back when the diff mov
   widened type, a skipped or deleted test, a relaxed assertion, a widened tolerance;
 - an architecture, layout or golden test edited so a violation passes;
 - the spec, an ADR, or the ticket's own acceptance criteria edited so the work fits them;
-- an acceptance line quietly dropped, or met by weaker means than it asked for.
+- an acceptance line quietly dropped, or met by weaker means than it asked for;
+- a detour that needed a decision the ticket had not settled — order it split into a ticket in
+  the `needs-triage` role, and the commit reverted.
 
 Whatever the agent doc states as non-negotiable is the rest of the list. Walk those rules
 over the diff one at a time, as review criteria rather than as background.

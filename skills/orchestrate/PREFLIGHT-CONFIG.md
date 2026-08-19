@@ -1,13 +1,14 @@
 # The orchestration config
 
-`docs/agents/orchestration.md` holds the three answers **no run can discover**. Everything else
+`docs/agents/orchestration.md` holds the four answers **no run can discover**. Everything else
 preflight needs — the gates, the bootstrap, the ordering convention — is read from CI, from the
 lockfile and from `issue-tracker.md` on every run, so it never goes stale against them.
 
 Read the file at preflight. When an answer is missing, grill the maintainer for it and write it
-back. A repo whose answer to all three is "none" still gets the file, so nothing is asked twice.
+back. A repo whose answer to every question is "none" still gets the file, so nothing is asked
+twice.
 
-## The three questions
+## The four questions
 
 Ask them one at a time, each with your recommended answer, so the maintainer can accept in a word.
 
@@ -35,6 +36,14 @@ proof exists, rather than treating its absence as a pass.
 
 Record a number only when the maintainer overrides the default.
 
+**4. The models.** One implements and one reviews, and a model name goes stale faster than this
+file, so the default is worded to survive a generation.
+
+> Which model implements each ticket, and which reviews it?
+> Recommended: _tiers_ — a mid-tier model per implementer, the strongest available for review.
+
+Record names only when the maintainer overrides the default.
+
 ## The file
 
 ```markdown
@@ -49,8 +58,8 @@ One implementer holds each of these at a time, under a lease of that name.
 
 | Lease | What it guards | Commands that need it | Stale after |
 | --- | --- | --- | --- |
-| `simulator` | the one booted iOS simulator | `xcodebuild`, `xcrun simctl`, `cap run ios` | 30m |
-| `port-5173` | the dev server's port | `pnpm --filter @openscoot/app serve` | 30m |
+| `simulator` | the one booted iOS simulator | `xcodebuild`, `xcrun simctl` | 30m |
+| `port-3000` | the dev server's port | `npm run dev` | 30m |
 
 _None_ is a complete answer, and the commonest one.
 
@@ -63,6 +72,10 @@ What an implementer shows beyond the gates, to prove the change runs.
 ## Cap
 
 `<number>`, or _machine_ for `max(1, cores / 2)`.
+
+## Models
+
+`<implementer> / <reviewer>`, or _tiers_ for a mid-tier implementer and the strongest reviewer.
 ```
 
 ## Keeping it honest
