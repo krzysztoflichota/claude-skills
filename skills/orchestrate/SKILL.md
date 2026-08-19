@@ -48,7 +48,9 @@ here. Settle all seven before the first ticket:
    Either one dirty is an unfinished ticket: stop and ask the maintainer.
 7. **The run directory.** `$(dirname <repo root>)/.orchestrate-<repo basename>/`, holding
    `worktrees/`, `leases/`, `logs/` and `table.md`. It sits outside the repo, so no worktree
-   is ever staged by accident and no ignore rule is needed.
+   is ever staged by accident and no ignore rule is needed. Print the command a second terminal
+   watches the table with — `watch -n 5 cat <run dir>/table.md`, or a `while`/`sleep` loop where
+   `watch` is missing — so the maintainer holds a standing view no chat can scroll away.
 
 _Done when_ you can name each role's label, the tracker's commands, every gate with its command,
 the bootstrap, the four config answers, the ordering convention, the trunk and the run directory.
@@ -248,11 +250,8 @@ which commands, in its prompt.
 
 ## The table
 
-`<run dir>/table.md`, rewritten at every state change. It is the only thing the maintainer reads
-while the run works, so the chat stays quiet between stop conditions.
-
-One row per open ticket in the pool, in the repo's ordering convention, with the rows in flight
-marked:
+The run's whole state, one row per open ticket in the pool, in the repo's ordering convention,
+with the rows in flight marked:
 
 | Order | Ticket | What it buys | Label | State |
 | --- | --- | --- | --- | --- |
@@ -262,6 +261,15 @@ marked:
 
 Carry every open ticket, not only the ready ones, so the maintainer can triage in another agent and
 watch a ticket join the pool. The state column is yours; every other column is the tracker's.
+
+It shows in two places, and the chat is the one that cannot be missed:
+
+- **The chat.** End every turn of the run with the table — the last text before you wait, after
+  the turn's tool calls, because only a turn's closing text reliably reaches the screen. The
+  maintainer reads the chat, not a file, so the table is the report, and prose joins it at a stop
+  condition and nowhere else.
+- **The file.** `<run dir>/table.md`, rewritten as you print, feeding the watch command preflight
+  printed: the standing view a second screen holds while the chat scrolls.
 
 ## Stop and ask the maintainer when
 

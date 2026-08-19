@@ -1,6 +1,6 @@
 {
   "name": "klichota-skills",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Backlog orchestration for repos configured with the mattpocock engineering skills.",
   "author": { "name": "Krzysztof Lichota" },
   "repository": "https://github.com/krzysztoflichota/claude-skills",
