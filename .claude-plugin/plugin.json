@@ -1,0 +1,10 @@
+{
+  "name": "klichota-skills",
+  "version": "0.1.0",
+  "description": "Backlog orchestration for repos configured with the mattpocock engineering skills.",
+  "author": { "name": "Krzysztof Lichota" },
+  "repository": "https://github.com/krzysztoflichota/claude-skills",
+  "license": "MIT",
+  "keywords": ["orchestration", "backlog", "worktree", "multi-agent"],
+  "skills": ["./skills/orchestrate", "./skills/orchestrate-slice"]
+}

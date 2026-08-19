@@ -1,0 +1,17 @@
+{
+  "name": "klichota",
+  "owner": {
+    "name": "Krzysztof Lichota",
+    "url": "https://github.com/krzysztoflichota"
+  },
+  "description": "Krzysztof Lichota's Claude Code skills.",
+  "plugins": [
+    {
+      "name": "klichota-skills",
+      "source": "./",
+      "description": "Backlog orchestration: run a repo's ready tickets with several implementers at once, or one spec's tickets one at a time.",
+      "category": "engineering",
+      "keywords": ["orchestration", "backlog", "worktree", "multi-agent"]
+    }
+  ]
+}
